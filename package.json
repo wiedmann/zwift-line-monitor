@@ -1,0 +1,18 @@
+{
+  "name": "zwift-line-monitor",
+  "version": "0.1.0",
+  "description": "monitors a set of lines and notifies when Zwift riders cross those lines based on player state passed in",
+  "main": "ZwiftLineMonitor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Christian Wiedmann",
+  "license": "ISC",
+  "dependencies": {
+    "node-cache": "^4.1.1"
+  },
+  "devDependencies": {
+    "faucet": "0.0.1",
+    "tape": "^4.6.3"
+  }
+}
