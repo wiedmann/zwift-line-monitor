@@ -38,7 +38,7 @@ class ZwiftLineMonitor extends EventEmitter {
       current = current.next
     }
     if (current) {
-      if (current.roadTime == roadTime) {
+      if (current.roadTime === roadTime) {
         throw new Error(`Tried to add duplicate line ${name} at roadTime ${roadTime} - ${current.name} is already there`)
       }
       line.next = current
@@ -88,6 +88,8 @@ class ZwiftLineMonitor extends EventEmitter {
     const oldPlayerState = rider.lastPlayerState
     crossing.lineId = line.id
     crossing.lineName = line.name
+    crossing.riderId = rider.id
+    crossing.forward = oldPlayerState.isForward
     crossing.serverWorldTime = interpolate(rider.lastServerWorldTime, newServerTime)
     crossing.playerWorldTime = interpolate(oldPlayerState.worldTime, newPlayerState.worldTime)
     crossing.roadPosition = interpolate(oldPlayerState.roadPosition, newPlayerState.roadPosition)
@@ -98,6 +100,7 @@ class ZwiftLineMonitor extends EventEmitter {
     crossing.power = interpolate(oldPlayerState.power, newPlayerState.power)
     crossing.time = interpolate(oldPlayerState.time, newPlayerState.time)
     crossing.calories = interpolate(oldPlayerState.calories, newPlayerState.calories)
+    crossing.climbing = interpolate(oldPlayerState.climbing, newPlayerState.climbing)
     crossing.groupId = oldPlayerState.groupId || newPlayerState.groupId
     crossing.sport = newPlayerState.sport
     crossing.rideOns = newPlayerState.rideOns
@@ -115,7 +118,7 @@ class ZwiftLineMonitor extends EventEmitter {
       const lines = this.findLines(playerState.world, playerState.roadID)
       rider.nextLine = lines.next
       rider.prevLine = lines.prev
-    } else if (rider.lastPlayerState.roadTime != playerState.roadTime) {
+    } else if (rider.lastPlayerState.roadTime !== playerState.roadTime) {
       while (rider.nextLine && playerState.roadTime >= rider.nextLine.roadTime) {
         this.generateCrossing(rider, rider.nextLine, playerState, serverWorldTime)
         rider.prevLine = rider.nextLine
