@@ -3,7 +3,7 @@ A class that monitors Zwift player updates and emits events whenever riders pass
 
 This library is intended to work with the wrapped status messages from zwift-mobile-api.
 
-#usage
+# Usage
 ```
 $>  npm install --save zwift-line-monitor
 ```
