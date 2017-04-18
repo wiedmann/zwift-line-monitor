@@ -20,6 +20,9 @@ class ZwiftLineMonitor extends EventEmitter {
   }
 
   addLine(id, name, world, roadId, roadTime) {
+    if (roadTime < 2) {
+      roadTime *= 1000000
+    }
     let line = {
       id: id,
       name: name,
@@ -90,8 +93,8 @@ class ZwiftLineMonitor extends EventEmitter {
     crossing.lineName = line.name
     crossing.riderId = rider.id
     crossing.forward = oldPlayerState.isForward
-    crossing.serverWorldTime = interpolate(rider.lastServerWorldTime, newServerTime)
-    crossing.playerWorldTime = interpolate(oldPlayerState.worldTime, newPlayerState.worldTime)
+    crossing.serverWorldTime = interpolate(rider.lastServerWorldTime.toNumber(), newServerTime.toNumber())
+    crossing.playerWorldTime = interpolate(oldPlayerState.worldTime.toNumber(), newPlayerState.worldTime.toNumber())
     crossing.roadPosition = interpolate(oldPlayerState.roadPosition, newPlayerState.roadPosition)
     crossing.distance = interpolate(oldPlayerState.distance, newPlayerState.distance)
     crossing.speed = interpolate(oldPlayerState.speed, newPlayerState.speed)

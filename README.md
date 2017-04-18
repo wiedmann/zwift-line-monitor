@@ -19,8 +19,10 @@ monitor.addLine(5, 'Watopia Arch', 1, 0, 0.9829)
 
 monitor.on('crossing', (crossing) => {
   console.log(crossing)
-}
+})
 
 monitor.updateRiderStatus(state1)
 monitor.updateRiderStatus(state2)
+
+monitor.start()
 ```
