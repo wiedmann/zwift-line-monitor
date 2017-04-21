@@ -5,7 +5,11 @@ This library is intended to work with the wrapped status messages from zwift-mob
 
 The source of the rider status messages could be modules such as zwift-second-screen or zwift-packet-monitor.
 
-# Usage
+Note that lines may be added using either a fractional roadTime or an integer value from 5000-1005000. The fractional
+values are adjusted internally to the integer values by multiplying by 1000000 and adding 5000. It is assumed the
+roadTime values in the rider statuses use this format of roadTimes.
+
+## Usage
 ```
 $>  npm install --save zwift-line-monitor
 ```
