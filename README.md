@@ -23,6 +23,4 @@ monitor.on('crossing', (crossing) => {
 
 monitor.updateRiderStatus(state1)
 monitor.updateRiderStatus(state2)
-
-monitor.start()
 ```

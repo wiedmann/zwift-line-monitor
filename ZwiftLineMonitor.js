@@ -21,7 +21,9 @@ class ZwiftLineMonitor extends EventEmitter {
 
   addLine(id, name, world, roadId, roadTime) {
     if (roadTime < 2) {
+      // convert fractional roadTimes to wire format (roadTime * 1000000 + 5000)
       roadTime *= 1000000
+      roadTime += 5000
     }
     let line = {
       id: id,
@@ -117,8 +119,10 @@ class ZwiftLineMonitor extends EventEmitter {
       this._riders.set(rider.id, rider)
     }
     //are we on a different road?
-    if (rider.lastPlayerState == null || rider.lastPlayerState.roadId !== playerState.roadId) {
-      const lines = this.findLines(playerState.world, playerState.roadID)
+    if (rider.lastPlayerState == null || rider.lastPlayerState.roadId !== playerState.roadId ||
+      (playerState.isForward && playerState.roadTime  < rider.lastPlayerState.roadTime) ||
+      (!playerState.isForward && playerState.roadTime > rider.lastPlayerState.roadTime)) {
+      const lines = this.findLines(playerState.world, playerState.roadID, playerState.roadTime)
       rider.nextLine = lines.next
       rider.prevLine = lines.prev
     } else if (rider.lastPlayerState.roadTime !== playerState.roadTime) {

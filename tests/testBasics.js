@@ -1,4 +1,5 @@
 const test = require ('tape')
+const Long = require('long')
 
 const ZwiftLineMonitor = require('../ZwiftLineMonitor')
 
@@ -22,10 +23,11 @@ test('add some lines', (t) => {
 
 let playerState = {
   id: 1,
-  worldTime: 2,
+  worldTime: Long.fromNumber(2),
   world: 1,
   roadID: 1,
-  roadTime: 0.05,
+  roadTime: 55000,
+  isForward: true,
   cadenceUHz: Math.round((90 / 60) * 1000000),
   power: 200,
   heartrate: 140,
@@ -55,14 +57,14 @@ test('generate line crossing', (t) => {
     t.equal(crossing.sport, 0, 'sport')
   }
   t.doesNotThrow(() => {
-    zlm.updateRiderStatus(playerState, 102)
+    zlm.updateRiderStatus(playerState, Long.fromNumber(102))
   }, 'initial rider state')
   t.doesNotThrow(() => {
     zlm.on('crossing', handleCrossing)
   }, 'register crossing listener')
   playerState = Object.assign({}, playerState)
-  playerState.worldTime += 2
-  playerState.roadTime = 0.15
+  playerState.worldTime = playerState.worldTime.add(2)
+  playerState.roadTime = 155000
   playerState.heartrate += 2
   playerState.cadence += 2
   playerState.distance += 2
@@ -70,7 +72,7 @@ test('generate line crossing', (t) => {
   playerState.time += 2
   playerState.calories += 2
   t.doesNotThrow(() => {
-    zlm.updateRiderStatus(playerState, 104)
+    zlm.updateRiderStatus(playerState, Long.fromNumber(104))
   }, 'updated rider state')
   t.equal(crossingHandled, true, 'line crossing')
   zlm.removeListener('crossing', handleCrossing)
@@ -85,12 +87,44 @@ test('second line crossing', (t) => {
   }
   zlm.on('crossing', handleCrossing)
   playerState = Object.assign({}, playerState)
-  playerState.worldTime += 2
-  playerState.roadTime = .35
+  playerState.worldTime = playerState.worldTime.add(2)
+  playerState.roadTime = 355000
   t.doesNotThrow(() => {
-    zlm.updateRiderStatus(playerState, 106)
+    zlm.updateRiderStatus(playerState, Long.fromNumber(106))
   }, 'move past two lines')
   t.equal(crossings, 2, 'two crossings generated')
+  zlm.removeListener('crossing', handleCrossing)
+  t.end()
+})
+
+test('wrap to 0', (t) => {
+  let crossings = 0
+  function handleCrossing(crossing) {
+    console.log(JSON.stringify(crossing, null, '  '))
+    crossings++
+  }
+  zlm.on('crossing', handleCrossing)
+  playerState = Object.assign({}, playerState)
+  playerState.id = 2
+  playerState.worldTime = playerState.worldTime.add(2)
+  playerState.roadTime = 1004000
+  t.doesNotThrow(() => {
+    zlm.updateRiderStatus(playerState, Long.fromNumber(106))
+  }, 'new rider')
+  playerState = Object.assign({}, playerState)
+  playerState.worldTime = playerState.worldTime.add(2)
+  playerState.roadTime = 6000
+  t.doesNotThrow(() => {
+    zlm.updateRiderStatus(playerState, Long.fromNumber(108))
+  }, 'wrap around')
+  t.equal(crossings, 0, 'no crossings generated')
+  playerState = Object.assign({}, playerState)
+  playerState.worldTime = playerState.worldTime.add(2)
+  playerState.roadTime = 106000
+  t.doesNotThrow(() => {
+    zlm.updateRiderStatus(playerState, Long.fromNumber(108))
+  }, 'cross line after wrapping')
+  t.equal(crossings, 1, 'one crossing after wrapping')
   zlm.removeListener('crossing', handleCrossing)
   t.end()
 })
