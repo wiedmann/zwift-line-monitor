@@ -109,6 +109,7 @@ class ZwiftLineMonitor extends EventEmitter {
     crossing.groupId = oldPlayerState.groupId || newPlayerState.groupId
     crossing.sport = newPlayerState.sport
     crossing.rideOns = newPlayerState.rideOns
+    crossing.laps = newPlayerState.laps
     this.emit('crossing', crossing)
   }
 
