@@ -12,11 +12,22 @@ class Rider {
 }
 
 class ZwiftLineMonitor extends EventEmitter {
-  constructor(riderTimeout = 10) {
+  constructor (riderTimeout = 10) {
     super()
     this._lines = {}
     this._riders = new NodeCache ( { stdTTL: riderTimeout, checkperiod: 60, useClones: false })
     this._riderTimeout = riderTimeout
+  }
+
+  setVisibiltyBox(x, y, radius) {
+    this._minX = x - radius
+    this._maxX = x + radius
+    this._minY = y - radius
+    this._maxY = y + radius
+  }
+
+  clearVisibilityBox() {
+    this._minX = this._maxX = this._minY = this._maxY = null
   }
 
   addLine(id, name, world, roadId, roadTime) {
@@ -115,6 +126,13 @@ class ZwiftLineMonitor extends EventEmitter {
 
   updateRiderStatus(playerState, serverWorldTime) {
     let rider = this._riders.get(playerState.id)
+    if (this._minX && (playerState.x < this._minX || playerState.x > this._maxX
+      || playerState.y < this._minY || playerState.y > this._maxY)) {
+      if (rider) {
+        this._riders.del(rider.id)
+      }
+      return
+    }
     if (! rider) {
       rider = new Rider(playerState.id)
       this._riders.set(rider.id, rider)
