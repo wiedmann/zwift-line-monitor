@@ -19,11 +19,16 @@ class ZwiftLineMonitor extends EventEmitter {
     this._riderTimeout = riderTimeout
   }
 
+  setVerbose(state) {
+    this._verbose = state
+  }
+
   setVisibiltyBox(x, y, radius) {
-    this._minX = x - radius
-    this._maxX = x + radius
-    this._minY = y - radius
-    this._maxY = y + radius
+    radius = Number(radius)
+    this._minX = Number(x) - radius
+    this._maxX = Number(x) + radius
+    this._minY = Number(y) - radius
+    this._maxY = Number(y) + radius
   }
 
   clearVisibilityBox() {
@@ -126,12 +131,19 @@ class ZwiftLineMonitor extends EventEmitter {
 
   updateRiderStatus(playerState, serverWorldTime) {
     let rider = this._riders.get(playerState.id)
-    if (this._minX && (playerState.x < this._minX || playerState.x > this._maxX
-      || playerState.y < this._minY || playerState.y > this._maxY)) {
+    if (this._minX && ((playerState.x < this._minX) || (playerState.x > this._maxX)
+      || (playerState.y < this._minY) || (playerState.y > this._maxY))) {
+      if (this._verbose) {
+        console.log(`Out of bounds update for rider id ${playerState.id} world ${playerState.world} road ${playerState.roadID} ${playerState.roadTime} (${playerState.x}, ${playerState.altitude}, ${playerState.y})` +
+        ` boundary (${this._minX}, ${this._minY}), (${this._maxX}, ${this._maxY})`)
+      }
       if (rider) {
         this._riders.del(rider.id)
       }
       return
+    }
+    if (this._verbose) {
+      console.log(`rider in ${playerState.id} world ${playerState.world} road ${playerState.roadID} ${playerState.roadTime}`)
     }
     if (! rider) {
       rider = new Rider(playerState.id)
