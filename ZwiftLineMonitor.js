@@ -8,6 +8,7 @@ class Rider {
     this.prevLine = null
     this.lastPlayerState = null
     this.lastServerWorldTime = 0
+    this.lastDistanceLine = 0
   }
 }
 
@@ -15,6 +16,7 @@ class ZwiftLineMonitor extends EventEmitter {
   constructor (riderTimeout = 10) {
     super()
     this._lines = {}
+    this._distanceLines = []
     this._riders = new NodeCache ( { stdTTL: riderTimeout, checkperiod: 60, useClones: false })
     this._riderTimeout = riderTimeout
   }
@@ -80,6 +82,16 @@ class ZwiftLineMonitor extends EventEmitter {
     }
   }
 
+  addDistanceMark(id, name, distance) {
+    let line = {
+      id: id,
+      name: name,
+      distance: distance,
+      type: 'distance'
+    }
+    this._distanceLines.push(line)
+  }
+
   findLines(world, roadId, roadTime) {
     let retval = {next: null, prev: null}
 
@@ -99,8 +111,7 @@ class ZwiftLineMonitor extends EventEmitter {
     return retval
   }
 
-  generateCrossing(rider, line, newPlayerState, newServerTime) {
-    const interpolationFactor = (line.roadTime - rider.lastPlayerState.roadTime) / (newPlayerState.roadTime - rider.lastPlayerState.roadTime)
+  emitCrossing(interpolationFactor, rider, line, newPlayerState, newServerTime) {
     function interpolate (a, b) {
       return a + ((b - a) * interpolationFactor)
     }
@@ -127,6 +138,17 @@ class ZwiftLineMonitor extends EventEmitter {
     crossing.rideOns = newPlayerState.rideOns
     crossing.laps = newPlayerState.laps
     this.emit('crossing', crossing)
+
+  }
+
+  generateCrossing(rider, line, newPlayerState, newServerTime) {
+    const interpolationFactor = (line.roadTime - rider.lastPlayerState.roadTime) / (newPlayerState.roadTime - rider.lastPlayerState.roadTime)
+    this.emitCrossing(interpolationFactor, rider, line, newPlayerState, newServerTime)
+  }
+
+  generateDistanceCrossing(rider, line, newPlayerState, newServerTime) {
+    const interpolationFactor = (line.distance - rider.lastPlayerState.distance) / (newPlayerState.distance - rider.lastPlayerState.distance)
+    this.emitCrossing(interpolationFactor, rider, line, newPlayerState, newServerTime)
   }
 
   updateRiderStatus(playerState, serverWorldTime) {
@@ -166,6 +188,11 @@ class ZwiftLineMonitor extends EventEmitter {
         this.generateCrossing(rider, rider.prevLine, playerState, serverWorldTime)
         rider.nextLine = rider.prevLine
         rider.prevLine = rider.prevLine.prev
+      }
+    }
+    for (let l of this._distanceLines) {
+      if (rider.lastPlayerState && rider.lastPlayerState.distance < l.distance && playerState.distance >= l.distance) {
+        this.generateDistanceCrossing(rider, l, playerState, serverWorldTime)
       }
     }
     rider.lastPlayerState = playerState

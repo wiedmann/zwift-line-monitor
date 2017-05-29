@@ -128,3 +128,20 @@ test('wrap to 0', (t) => {
   zlm.removeListener('crossing', handleCrossing)
   t.end()
 })
+
+test('distance mark', (t) => {
+  let crossings = 0
+  function handleCrossing(crossing) {
+    t.equal(crossing.lineId, 1000)
+    crossings++
+  }
+  zlm.on('crossing', handleCrossing)
+  zlm.addDistanceMark(1000, '1100', 1100)
+  playerState = Object.assign({}, playerState)
+  playerState.worldTime = playerState.worldTime.add(2)
+  playerState.distance = 1100
+  zlm.updateRiderStatus(playerState, Long.fromNumber(110))
+  t.equal(crossings, 1, 'distance mark crossing')
+  zlm.removeListener('crossing', handleCrossing)
+  t.end()
+})
