@@ -133,6 +133,9 @@ class ZwiftLineMonitor extends EventEmitter {
     crossing.time = interpolate(oldPlayerState.time, newPlayerState.time)
     crossing.calories = interpolate(oldPlayerState.calories, newPlayerState.calories)
     crossing.climbing = interpolate(oldPlayerState.climbing, newPlayerState.climbing)
+    crossing.x = interpolate(oldPlayerState.x, newPlayerState.x)
+    crossing.altitude = interpolate(oldPlayerState.altitude, newPlayerState.altitude)
+    crossing.y = interpolate(oldPlayerState.y, newPlayerState.y)
     crossing.groupId = oldPlayerState.groupId || newPlayerState.groupId
     crossing.sport = newPlayerState.sport
     crossing.rideOns = newPlayerState.rideOns

@@ -1,6 +1,6 @@
 {
   "name": "zwift-line-monitor",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "monitors a set of lines and notifies when Zwift riders cross those lines based on player state passed in",
   "homepage": "https://github.com/wiedmann/zwift-line-monitor",
   "repository": "https://github.com/wiedmann/zwift-line-monitor.git",
